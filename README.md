@@ -9,6 +9,9 @@ A single-file, browser-only tool for filling in and signing PDFs. Open a PDF, cl
 - **Create a signature** by drawing it on a pad, or by typing your name and picking one of three handwriting fonts (Dancing Script, Great Vibes, Caveat). It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
 - **Download** a new PDF named `<original>-signed.pdf`. Text and signatures are written into the real PDF, not just shown on screen.
 - **Try a sample page**: makes a sample "Equipment loan form" so you can try the editor without a file.
+- A privacy note in the footer tells users their files never leave their device: there is no backend, no uploads, and nothing is stored or seen by the site owner.
+- An **About us** section links to [KamTech Solutions](https://kamtechsolutions.eu) and explains the tool is free. Instead of paying, users are asked to donate to charity or help someone close to them who is struggling.
+- A **distinct user counter** in the footer uses the free [Abacus](https://jasoncameron.dev/abacus/) counting API. Each browser adds +1 only on its first visit (remembered in `localStorage`) and later just reads the total, so no personal data is sent. If the service can't be reached, the counter stays hidden and the rest of the app works as usual.
 - Styled with the KamTech Solutions brand (Indigo Edge palette, Sora and Manrope fonts, logo and favicon).
 - Light and dark themes follow your system setting, with a toggle in the header to switch. The layout works on phones.
 
