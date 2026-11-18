@@ -6,7 +6,7 @@ A single-file, browser-only tool for filling in and signing PDFs. Open a PDF, cl
 
 - **Open any PDF** with the Open button, the file picker, or drag and drop. Multi-page documents work.
 - **Add text** anywhere on a page. You can pick the size (9–24 pt) and the ink colour (black or blue). Text boxes support multiple lines and can be moved with the grip handle.
-- **Create a signature** by drawing it on a pad, or by typing your name and picking one of three handwriting fonts (Dancing Script, Great Vibes, Caveat). It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
+- **Create a signature** by drawing it on a pad, or by typing your name and picking one of 12 handwriting styles (Dancing Script, Great Vibes, Caveat, Allura, Alex Brush, Sacramento, Mr Dafoe, Homemade Apple, Satisfy, Pinyon Script, Herr Von Muellerhoff, Kristi). Your chosen style is remembered. It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
 - **Download** a new PDF named `<original>-signed.pdf`. Text and signatures are written into the real PDF, not just shown on screen.
 - **Try a sample page**: makes a sample "Equipment loan form" so you can try the editor without a file.
 - A privacy note in the footer tells users their files never leave their device: there is no backend, no uploads, and nothing is stored or seen by the site owner.
@@ -25,7 +25,7 @@ open index.html            # macOS
 python3 -m http.server 8000  # then visit http://localhost:8000
 ```
 
-Libraries and fonts load from their CDNs. If a CDN can't be reached (offline, blocked, or down), the page falls back to the local copies in `vendor/`, so it also works fully offline.
+An internet connection is needed: PDF.js, pdf-lib and the fonts load from public CDNs (cdnjs and Google Fonts).
 
 ### Keyboard shortcuts
 
@@ -59,11 +59,4 @@ assets/
   kamtech-logo.png       # header logo
   favicon.png            # browser tab icon
   apple-touch-icon.png   # home-screen icon
-vendor/
-  pdf.min.js             # PDF.js 3.11.174
-  pdf.worker.min.js      # PDF.js worker
-  pdf-lib.min.js         # pdf-lib 1.17.1
-  fonts/
-    fonts.css            # @font-face rules (latin subset)
-    *.woff2              # Sora, Manrope, Dancing Script, Great Vibes, Caveat
 ```

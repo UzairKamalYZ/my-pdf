@@ -8,15 +8,10 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#6366f1">
 <script>try{const t=localStorage.getItem('fs-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
-<!-- Load from CDN first; fall back to the local copies in vendor/ when offline or the CDN is down. -->
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400..700&family=Manrope:wght@400..700&family=Caveat:wght@600&family=Dancing+Script:wght@600&family=Great+Vibes&display=swap" rel="stylesheet" onerror="this.onerror=null;this.href='vendor/fonts/fonts.css'">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400..700&family=Manrope:wght@400..700&family=Caveat:wght@600&family=Dancing+Script:wght@600&family=Great+Vibes&family=Allura&family=Alex+Brush&family=Sacramento&family=Mr+Dafoe&family=Homemade+Apple&family=Satisfy&family=Pinyon+Script&family=Herr+Von+Muellerhoff&family=Kristi&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>window.pdfjsLib || document.write('<script src="vendor/pdf.min.js"><\/script>')</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
-<script>window.PDF_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-if(!window.pdfjsWorker){ window.PDF_WORKER_SRC = 'vendor/pdf.worker.min.js'; document.write('<script src="vendor/pdf.worker.min.js"><\/script>'); }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script>window.PDFLib || document.write('<script src="vendor/pdf-lib.min.js"><\/script>')</script>
 <style>
 /*
 Theme: KamTech Solutions "Indigo Edge" (matches kamtechsolutions website).
@@ -41,7 +36,7 @@ Follows the system light/dark setting; the header toggle overrides it (data-them
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 [hidden]{display:none!important}
-body{margin:0;background:var(--desk);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip;min-height:100vh}
+body{margin:0;background:var(--desk);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip;min-height:100vh;display:flex;flex-direction:column}
 h1,h2,h3{font-family:var(--display);letter-spacing:-.02em}
 button,select,input{font:inherit;color:inherit}
 header{background:var(--bar);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
@@ -79,7 +74,6 @@ select{min-height:44px;border-radius:8px;border:1px solid var(--line);background
 .credit{margin:0;font-size:13px;color:var(--mute)}
 .credit a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .credit a:hover{color:var(--brand)}
-body{display:flex;flex-direction:column}
 main{flex:1;padding:28px max(3vw,12px) 64px;display:flex;flex-direction:column;align-items:center;gap:30px}
 .page{position:relative;width:min(100%,var(--pw));aspect-ratio:var(--ar);background:var(--paper);box-shadow:var(--shadow);container-type:inline-size;border-radius:4px}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:4px}
@@ -113,8 +107,8 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
 .tab[aria-selected=true]{background:var(--card);box-shadow:0 1px 3px oklch(.257 .09 281 / .15)}
 .typepane{display:grid;gap:10px}
 #sigtext{min-height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);padding:0 12px;font-size:16px;width:100%}
-.fopt{min-height:64px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:32px;line-height:1.2;cursor:pointer;padding:0 16px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fopt{font-weight:600}.fopt[data-font="Great Vibes"]{font-weight:400}
+.fonts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:8px;max-height:min(46vh,360px);overflow-y:auto;padding:3px}
+.fopt{min-height:60px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:28px;line-height:1.3;cursor:pointer;padding:0 14px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fopt[aria-pressed=true]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
 .mrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .mrow .btn:first-child{margin-inline-end:auto}
@@ -150,7 +144,7 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
       <button class="sw" data-color="#111111" aria-pressed="true" aria-label="Black ink" style="background:#111"></button>
       <button class="sw" data-color="#1d3fbf" aria-pressed="false" aria-label="Blue ink" style="background:#1d3fbf"></button>
       <span class="sep"></span>
-      <a class="btn" href="#about" title="About Fill &amp; Sign" style="text-decoration:none;color:inherit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg><span class="lb">About</span></a>
+      <a class="btn icon" href="#about" title="About Fill &amp; Sign" aria-label="About Fill &amp; Sign" style="text-decoration:none;color:inherit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></a>
       <button class="btn icon" id="theme" title="Switch light / dark theme" aria-label="Switch light or dark theme"><svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
       <button class="btn main" id="dl" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span class="lb">Download PDF</span></button>
     </div>
@@ -212,11 +206,7 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
     <div class="pad" id="drawpane"><canvas id="pad"></canvas></div>
     <div class="typepane" id="typepane" hidden>
       <input id="sigtext" type="text" placeholder="Type your name" aria-label="Your name" autocomplete="name">
-      <div class="typepane" role="group" aria-label="Signature style">
-        <button class="fopt" data-font="Dancing Script" aria-pressed="true" style="font-family:'Dancing Script',cursive">Your name</button>
-        <button class="fopt" data-font="Great Vibes" aria-pressed="false" style="font-family:'Great Vibes',cursive">Your name</button>
-        <button class="fopt" data-font="Caveat" aria-pressed="false" style="font-family:'Caveat',cursive">Your name</button>
-      </div>
+      <div class="fonts" id="fonts" role="group" aria-label="Signature style"></div>
     </div>
     <div class="mrow">
       <button class="btn" id="last" hidden>Use last signature</button>
@@ -231,9 +221,9 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
 <script>
 {
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-pdfjsLib.GlobalWorkerOptions.workerSrc = window.PDF_WORKER_SRC;
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const st = { bytes:null, name:'document.pdf', pages:[], items:[], tool:'select', size:11, color:'#111111', sig:null, sel:null, uid:0 };
+const st = { bytes:null, name:'document.pdf', pages:[], items:[], tool:'select', size:11, color:'#111111', sig:null, sel:null };
 const main = $('#main'), empty = $('#empty');
 
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),2600); }
@@ -323,7 +313,7 @@ function render(it){
   if(it.type==='text'){ el.querySelector('.txt').style.fontSize = 'calc('+it.size+' / '+pg.w+' * 100cqw)'; el.style.color = it.color; }
   else { el.style.width = pct(it.w,pg.w); el.style.height = pct(it.h,pg.h); }
 }
-function add(it){ it.id=++st.uid; st.items.push(it); render(it); select(it); return it; }
+function add(it){ st.items.push(it); render(it); select(it); return it; }
 function remove(it){ st.items = st.items.filter(i=>i!==it); it.el && it.el.remove(); if(st.sel===it) st.sel=null; }
 function select(it){ st.sel && st.sel.el && st.sel.el.classList.remove('sel'); st.sel=it; it && it.el && it.el.classList.add('sel'); }
 
@@ -334,7 +324,8 @@ function onLayerDown(e,pg){
   if(st.tool==='text'){
     e.preventDefault();
     const it = add({type:'text',page:pg.i,x:p.x,y:p.y-st.size*0.6,size:st.size,color:st.color,text:''});
-    setTimeout(()=>it.el.querySelector('.txt').focus(),0);
+    const t = it.el.querySelector('.txt');
+    t.focus(); setTimeout(()=>{ if(document.activeElement!==t) t.focus(); },0);  // focus now so no keystroke is lost
   } else if(st.tool==='place' && st.sig){
     const w = Math.min(170, pg.w*.4), h = w/st.sig.ar;
     add({type:'sig',page:pg.i,x:p.x-w/2,y:p.y-h/2,w,h,src:st.sig.src});
@@ -403,7 +394,17 @@ $$('.sw').forEach(b=>b.onclick=()=>{
 /* ---------- signature pad ---------- */
 const pad=$('#pad'), ctx=pad.getContext('2d'); let drawn=false, last=null;
 function sizePad(){ const r=pad.getBoundingClientRect(), d=devicePixelRatio||1; pad.width=r.width*d; pad.height=r.height*d; ctx.setTransform(d,0,0,d,0,0); ctx.lineCap=ctx.lineJoin='round'; drawn=false; }
-let mode='draw', sigFont='Dancing Script';
+/* Handwriting fonts for typed signatures: [family, weight, previewScale]. Each must also be in the
+   Google Fonts link in <head>. previewScale evens out fonts that are naturally bigger or smaller. */
+const SIG_FONTS = [
+  ['Dancing Script',600], ['Great Vibes',400], ['Caveat',600], ['Allura',400],
+  ['Alex Brush',400], ['Sacramento',400,1.15], ['Mr Dafoe',400], ['Homemade Apple',400,.8],
+  ['Satisfy',400], ['Pinyon Script',400,.9], ['Herr Von Muellerhoff',400,1.15], ['Kristi',400,1.1],
+];
+let mode='draw', sigFont=SIG_FONTS[0];
+try{ const f=localStorage.getItem('fs-sigfont'); sigFont = SIG_FONTS.find(x=>x[0]===f) || sigFont; }catch(e){}
+$('#fonts').innerHTML = SIG_FONTS.map(([f,w,s=1])=>
+  `<button class="fopt" data-font="${f}" aria-pressed="${f===sigFont[0]}" title="${f}" style="font-family:'${f}',cursive;font-weight:${w};font-size:${28*s}px">Your name</button>`).join('');
 function setMode(m){
   mode=m;
   $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.mode===m));
@@ -417,7 +418,10 @@ function previewType(){
 $$('.tab').forEach(t=>t.onclick=()=>setMode(t.dataset.mode));
 $('#sigtext').addEventListener('input', previewType);
 $('#sigtext').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#use').click(); });
-$$('.fopt').forEach(b=>b.onclick=()=>{ sigFont=b.dataset.font; $$('.fopt').forEach(f=>f.setAttribute('aria-pressed', f===b)); });
+$$('.fopt').forEach(b=>b.onclick=()=>{
+  sigFont=SIG_FONTS.find(x=>x[0]===b.dataset.font); $$('.fopt').forEach(f=>f.setAttribute('aria-pressed', f===b));
+  try{ localStorage.setItem('fs-sigfont', sigFont[0]); }catch(e){}
+});
 function cropSig(cv){
   const {width:W,height:H}=cv, d=cv.getContext('2d').getImageData(0,0,W,H).data; let x0=W,y0=H,x1=0,y1=0;
   for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(d[(y*W+x)*4+3]>10){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
@@ -426,11 +430,12 @@ function cropSig(cv){
   return {src:c.toDataURL('image/png'), ar:w/h};
 }
 async function typedSig(text){
-  const px=120, f=(sigFont==='Great Vibes'?'400 ':'600 ')+px+'px "'+sigFont+'"';
+  const px=120, f=sigFont[1]+' '+px+'px "'+sigFont[0]+'"';
   try{ await document.fonts.load(f, text); }catch(e){}
   const c=document.createElement('canvas'), g=c.getContext('2d'); g.font=f;
-  c.width=Math.ceil(g.measureText(text).width+px); c.height=px*2;
-  g.font=f; g.fillStyle=st.color; g.textBaseline='middle'; g.fillText(text, px/2, px);
+  // generous margins: script fonts have swashes that reach well outside their measured box; cropSig trims it
+  c.width=Math.ceil(g.measureText(text).width+px*2); c.height=px*3;
+  g.font=f; g.fillStyle=st.color; g.textBaseline='middle'; g.fillText(text, px, px*1.5);
   return cropSig(c);
 }
 function openSign(){
@@ -440,7 +445,7 @@ function openSign(){
   $('#last').hidden=!saved; $('#last').onclick=()=>{ st.sig=saved; closeSign(); setTool('place'); };
 }
 function closeSign(){ $('#ov').classList.remove('on'); }
-pad.addEventListener('pointerdown', e=>{ pad.setPointerCapture(e.pointerId); last=[e.offsetX,e.offsetY]; ctx.strokeStyle=st.color==='#111111'?'#111':st.color; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(last[0],last[1],1.2,0,7); ctx.fill(); });
+pad.addEventListener('pointerdown', e=>{ pad.setPointerCapture(e.pointerId); last=[e.offsetX,e.offsetY]; ctx.strokeStyle=ctx.fillStyle=st.color; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(last[0],last[1],1.2,0,7); ctx.fill(); });
 pad.addEventListener('pointermove', e=>{ if(!last) return; ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); last=[e.offsetX,e.offsetY]; drawn=true; });
 pad.addEventListener('pointerup', ()=>last=null);
 $('#clr').onclick = () => { if(mode==='draw') sizePad(); else { $('#sigtext').value=''; previewType(); $('#sigtext').focus(); } };
@@ -478,23 +483,14 @@ $('#dl').onclick = async () => {
         p.drawImage(img,{x:b.x+it.x, y:b.y+b.height-it.y-it.h, width:it.w, height:it.h});
       }
     }
-    const out = await doc.save(), name = st.name.replace(/\.pdf$/i,'')+'-signed.pdf';
-    await saveFile(out,name);
+    const name = st.name.replace(/\.pdf$/i,'')+'-signed.pdf';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    toast('Downloaded '+name);
   } catch(e){ console.error(e); toast('Could not build the PDF: '+(e.message||e)); }
   btn.disabled=false;
 };
-async function saveFile(bytes,name){
-  let dl=null;
-  try{ if(window.claude && window.claude.use) dl = await window.claude.use('downloads'); }catch(e){}
-  if(dl){
-    try{ await dl.save({filename:name, data:new Blob([bytes],{type:'application/pdf'})}); toast('Saved '+name); }
-    catch(e){ toast(e && e.code==='declined' ? 'Download cancelled' : 'Download not available here'); }
-    return;
-  }
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})); a.download=name;
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast('Downloaded '+name);
-}
 }
 </script>
 </body>
