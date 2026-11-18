@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF Fill and Sign</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Caveat:wght@600&family=Dancing+Script:wght@600&family=Great+Vibes&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -72,6 +72,15 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
 .pad{position:relative;height:200px;background:#fff;border-radius:10px;border:1px solid var(--line)}
 .pad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .pad::after{content:"";position:absolute;left:8%;right:8%;bottom:48px;border-bottom:1.5px solid #c5cad9;pointer-events:none}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:10px;width:max-content}
+.tab{min-height:36px;padding:0 18px;border:0;border-radius:7px;background:transparent;cursor:pointer;font-weight:500}
+.tab[aria-selected=true]{background:var(--bar);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.typepane{display:grid;gap:10px}
+#sigtext{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bar);padding:0 12px;font-size:16px;width:100%}
+.fopt{min-height:64px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:32px;line-height:1.2;cursor:pointer;padding:0 16px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fopt{font-weight:600}.fopt[data-font="Great Vibes"]{font-weight:400}
+.fopt[aria-pressed=true]{border-color:var(--seal);box-shadow:0 0 0 2px var(--seal)}
 .mrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .mrow .btn:first-child{margin-inline-end:auto}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bar);padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;z-index:60;font-size:15px;pointer-events:none;max-width:90vw}
@@ -127,8 +136,20 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
 
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="sigt">
   <div class="modal">
-    <h3 id="sigt">Draw your signature</h3>
-    <div class="pad"><canvas id="pad"></canvas></div>
+    <h3 id="sigt">Create your signature</h3>
+    <div class="tabs" role="tablist" aria-label="Signature method">
+      <button class="tab" role="tab" data-mode="draw" aria-selected="true">Draw</button>
+      <button class="tab" role="tab" data-mode="type" aria-selected="false">Type</button>
+    </div>
+    <div class="pad" id="drawpane"><canvas id="pad"></canvas></div>
+    <div class="typepane" id="typepane" hidden>
+      <input id="sigtext" type="text" placeholder="Type your name" aria-label="Your name" autocomplete="name">
+      <div class="typepane" role="group" aria-label="Signature style">
+        <button class="fopt" data-font="Dancing Script" aria-pressed="true" style="font-family:'Dancing Script',cursive">Your name</button>
+        <button class="fopt" data-font="Great Vibes" aria-pressed="false" style="font-family:'Great Vibes',cursive">Your name</button>
+        <button class="fopt" data-font="Caveat" aria-pressed="false" style="font-family:'Caveat',cursive">Your name</button>
+      </div>
+    </div>
     <div class="mrow">
       <button class="btn" id="last" hidden>Use last signature</button>
       <button class="btn" id="clr">Clear</button>
@@ -288,9 +309,39 @@ $$('.sw').forEach(b=>b.onclick=()=>{
 /* ---------- signature pad ---------- */
 const pad=$('#pad'), ctx=pad.getContext('2d'); let drawn=false, last=null;
 function sizePad(){ const r=pad.getBoundingClientRect(), d=devicePixelRatio||1; pad.width=r.width*d; pad.height=r.height*d; ctx.setTransform(d,0,0,d,0,0); ctx.lineCap=ctx.lineJoin='round'; drawn=false; }
+let mode='draw', sigFont='Dancing Script';
+function setMode(m){
+  mode=m;
+  $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.mode===m));
+  $('#drawpane').hidden = m!=='draw'; $('#typepane').hidden = m!=='type';
+  if(m==='draw') sizePad(); else { previewType(); $('#sigtext').focus(); }
+}
+function previewType(){
+  const v=$('#sigtext').value.trim()||'Your name';
+  $$('.fopt').forEach(b=>{ b.textContent=v; b.style.color=st.color; });
+}
+$$('.tab').forEach(t=>t.onclick=()=>setMode(t.dataset.mode));
+$('#sigtext').addEventListener('input', previewType);
+$('#sigtext').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#use').click(); });
+$$('.fopt').forEach(b=>b.onclick=()=>{ sigFont=b.dataset.font; $$('.fopt').forEach(f=>f.setAttribute('aria-pressed', f===b)); });
+function cropSig(cv){
+  const {width:W,height:H}=cv, d=cv.getContext('2d').getImageData(0,0,W,H).data; let x0=W,y0=H,x1=0,y1=0;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(d[(y*W+x)*4+3]>10){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+  const p=6, w=x1-x0+p*2, h=y1-y0+p*2, c=document.createElement('canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(cv,x0-p,y0-p,w,h,0,0,w,h);
+  return {src:c.toDataURL('image/png'), ar:w/h};
+}
+async function typedSig(text){
+  const px=120, f=(sigFont==='Great Vibes'?'400 ':'600 ')+px+'px "'+sigFont+'"';
+  try{ await document.fonts.load(f, text); }catch(e){}
+  const c=document.createElement('canvas'), g=c.getContext('2d'); g.font=f;
+  c.width=Math.ceil(g.measureText(text).width+px); c.height=px*2;
+  g.font=f; g.fillStyle=st.color; g.textBaseline='middle'; g.fillText(text, px/2, px);
+  return cropSig(c);
+}
 function openSign(){
   if(!st.bytes) return toast('Open a PDF first');
-  $('#ov').classList.add('on'); sizePad();
+  $('#ov').classList.add('on'); setMode(mode);
   let saved=null; try{ saved=JSON.parse(localStorage.getItem('fs-sig')); }catch(e){}
   $('#last').hidden=!saved; $('#last').onclick=()=>{ st.sig=saved; closeSign(); setTool('place'); };
 }
@@ -298,16 +349,18 @@ function closeSign(){ $('#ov').classList.remove('on'); }
 pad.addEventListener('pointerdown', e=>{ pad.setPointerCapture(e.pointerId); last=[e.offsetX,e.offsetY]; ctx.strokeStyle=st.color==='#111111'?'#111':st.color; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(last[0],last[1],1.2,0,7); ctx.fill(); });
 pad.addEventListener('pointermove', e=>{ if(!last) return; ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); last=[e.offsetX,e.offsetY]; drawn=true; });
 pad.addEventListener('pointerup', ()=>last=null);
-$('#clr').onclick = sizePad;
+$('#clr').onclick = () => { if(mode==='draw') sizePad(); else { $('#sigtext').value=''; previewType(); $('#sigtext').focus(); } };
 $('#cancel').onclick = closeSign;
 $('#ov').addEventListener('pointerdown', e=>{ if(e.target.id==='ov') closeSign(); });
-$('#use').onclick = () => {
-  if(!drawn) return toast('Draw your signature first');
-  const {width:W,height:H}=pad, d=ctx.getImageData(0,0,W,H).data; let x0=W,y0=H,x1=0,y1=0;
-  for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(d[(y*W+x)*4+3]>10){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
-  const p=6, w=x1-x0+p*2, h=y1-y0+p*2, c=document.createElement('canvas'); c.width=w; c.height=h;
-  c.getContext('2d').drawImage(pad,x0-p,y0-p,w,h,0,0,w,h);
-  st.sig={src:c.toDataURL('image/png'), ar:w/h};
+$('#use').onclick = async () => {
+  if(mode==='type'){
+    const text=$('#sigtext').value.trim();
+    if(!text) return toast('Type your name first');
+    st.sig = await typedSig(text);
+  } else {
+    if(!drawn) return toast('Draw your signature first');
+    st.sig = cropSig(pad);
+  }
   try{ localStorage.setItem('fs-sig', JSON.stringify(st.sig)); }catch(e){}
   closeSign(); setTool('place');
 };

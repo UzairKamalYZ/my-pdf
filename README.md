@@ -6,7 +6,7 @@ A single-file, browser-only tool for filling in and signing PDFs. Open a PDF, cl
 
 - **Open any PDF** with the Open button, the file picker, or drag and drop. Multi-page documents work.
 - **Add text** anywhere on a page. You can pick the size (9–24 pt) and the ink colour (black or blue). Text boxes support multiple lines and can be moved with the grip handle.
-- **Draw a signature** on a signature pad. It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
+- **Create a signature** by drawing it on a pad, or by typing your name and picking one of three handwriting fonts (Dancing Script, Great Vibes, Caveat). It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
 - **Download** a new PDF named `<original>-signed.pdf`. Text and signatures are written into the real PDF, not just shown on screen.
 - **Try a sample page**: makes a sample "Equipment loan form" so you can try the editor without a file.
 - Light and dark themes follow your system setting, and the layout works on phones.
