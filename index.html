@@ -74,6 +74,7 @@ select{min-height:44px;border-radius:8px;border:1px solid var(--line);background
 .credit{margin:0;font-size:13px;color:var(--mute)}
 .credit a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .credit a:hover{color:var(--brand)}
+.credit .ver{font-variant-numeric:tabular-nums}
 main{flex:1;padding:28px max(3vw,12px) 64px;display:flex;flex-direction:column;align-items:center;gap:30px}
 .page{position:relative;width:min(100%,var(--pw));aspect-ratio:var(--ar);background:var(--paper);box-shadow:var(--shadow);container-type:inline-size;border-radius:4px}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:4px}
@@ -192,7 +193,7 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
     </section>
   </div>
   <p class="users" id="users" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg><span><b id="ucount"></b> <span id="uword">people have</span> used Fill &amp; Sign</span></p>
-  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a></p>
+  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.0.0</span></p>
 </footer>
 <input type="file" id="file" accept="application/pdf,.pdf" hidden>
 
@@ -475,12 +476,21 @@ $('#dl').onclick = async () => {
     const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica), pages = doc.getPages();
     for(const it of st.items){
       const p = pages[it.page], b = p.getCropBox();
+      /* Items are positioned in on-screen page space (top-left origin, after the page's /Rotate is
+         applied). Map a screen point (u,v) back to PDF user space, and counter-rotate what we draw,
+         so pages with /Rotate 90/180/270 get the item where it was placed and upright. */
+      const r = ((p.getRotation().angle % 360) + 360) % 360;
+      const at = (u,v) => r===90  ? {x:b.x+v,          y:b.y+u}
+                        : r===180 ? {x:b.x+b.width-u,  y:b.y+v}
+                        : r===270 ? {x:b.x+b.width-v,  y:b.y+b.height-u}
+                        :           {x:b.x+u,          y:b.y+b.height-v};
+      const rotate = PDFLib.degrees(r);
       if(it.type==='text'){
         if(!it.text.trim()) continue;
-        it.text.split('\n').forEach((ln,i)=>p.drawText(clean(ln),{x:b.x+it.x, y:b.y+b.height-it.y-it.size*(0.9465+1.2*i), size:it.size, font, color:hex(it.color)}));
+        it.text.split('\n').forEach((ln,i)=>p.drawText(clean(ln),{...at(it.x, it.y+it.size*(0.9465+1.2*i)), rotate, size:it.size, font, color:hex(it.color)}));
       } else {
         const img = await doc.embedPng(it.src);
-        p.drawImage(img,{x:b.x+it.x, y:b.y+b.height-it.y-it.h, width:it.w, height:it.h});
+        p.drawImage(img,{...at(it.x, it.y+it.h), rotate, width:it.w, height:it.h});
       }
     }
     const name = st.name.replace(/\.pdf$/i,'')+'-signed.pdf';
