@@ -225,7 +225,7 @@ body.scanning{overflow:hidden}
     </section>
   </div>
   <p class="users" id="users" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg><span><b id="ucount"></b> <span id="uword">people have</span> used Fill &amp; Sign</span></p>
-  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.1.0</span></p>
+  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.1.1</span></p>
 </footer>
 <input type="file" id="file" accept="application/pdf,.pdf" hidden>
 
@@ -437,13 +437,22 @@ $('#yr').textContent = new Date().getFullYear();
 (async () => {
   const API = 'https://abacus.jasoncameron.dev', KEY = 'kamtechsolutions.eu/fill-and-sign-users';
   let counted = false; try{ counted = localStorage.getItem('fs-counted')==='1'; }catch(e){}
+  const call = async kind => {
+    const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), 8000);
+    try{ return await fetch(API+'/'+kind+'/'+KEY, {cache:'no-store', signal:ctl.signal}); } finally{ clearTimeout(t); }
+  };
   try{
-    const r = await fetch(API+(counted?'/get/':'/hit/')+KEY, {cache:'no-store'});
-    if(!r.ok) return;
+    let r = await call(counted ? 'get' : 'hit');
+    if(r.status===404 && counted){ counted=false; r = await call('hit'); }  // counter was reset on the service: count this browser again
+    if(!r.ok) throw new Error('HTTP '+r.status);
     const {value} = await r.json();
     if(!counted){ try{ localStorage.setItem('fs-counted','1'); }catch(e){} }
-    if(typeof value==='number' && value>0){ $('#ucount').textContent = value.toLocaleString(); $('#uword').textContent = value===1?'person has':'people have'; $('#users').hidden=false; }
-  }catch(e){}
+    if(typeof value!=='number') throw new Error('unexpected response');
+    if(value>0){ $('#ucount').textContent = value.toLocaleString(); $('#uword').textContent = value===1?'person has':'people have'; $('#users').hidden=false; }
+  }catch(e){
+    // Stays hidden; the reason is logged so it can be checked in the browser console.
+    console.warn('User counter unavailable ('+API+'): '+(e.name==='AbortError' ? 'timed out' : e.message||e)+'. A blocked request (ad blocker or the service being down) also shows up here.');
+  }
 })();
 
 /* ---------- theme ---------- */
