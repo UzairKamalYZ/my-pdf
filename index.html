@@ -121,6 +121,36 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
 .moon{display:none}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .sun{display:none}:root:not([data-theme=light]) .moon{display:block}}
 :root[data-theme=dark] .sun{display:none}:root[data-theme=dark] .moon{display:block}
+/* ---------- scanner ---------- */
+body.scanning{overflow:hidden}
+.scan{position:fixed;inset:0;z-index:40;background:var(--desk);display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;gap:10px;padding:12px max(3vw,16px) max(12px,env(safe-area-inset-bottom))}
+.scan-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.scan-top h3{margin:0;font-size:20px}
+.scan-top .btn{margin-inline-start:auto}
+.stage{container-type:size;display:grid;place-items:center;min-height:180px}
+.shot{position:relative;aspect-ratio:var(--ar,.75);width:min(calc(100cqw - 36px),calc((100cqh - 36px)*var(--ar,.75)));background:#fff;box-shadow:var(--shadow);border-radius:4px}
+.shot canvas{display:block;width:100%;height:100%;border-radius:4px}
+.shot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none;user-select:none}
+.shot .hit{cursor:grab}.shot .hdl{pointer-events:none}
+.scan-empty{display:grid;gap:14px;justify-items:center;text-align:center;max-width:44ch;color:var(--mute)}
+.scan-empty p{margin:0}
+.scan-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+.scan-tools>*,.scan-tools .tab{flex:none;white-space:nowrap}
+.tab[aria-checked=true]{background:var(--card);box-shadow:0 1px 3px oklch(.257 .09 281 / .15)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px;justify-content:safe center}
+.th{position:relative;flex:none;width:58px;height:76px;padding:3px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.th img{width:100%;height:100%;object-fit:contain;display:block}
+.th span{position:absolute;right:3px;bottom:3px;font-size:11px;font-weight:600;background:var(--ink);color:var(--bg);border-radius:5px;padding:0 5px}
+.th[aria-current=true]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
+@media(max-width:600px){
+  .scan{gap:8px;padding:8px 12px max(10px,env(safe-area-inset-bottom))}
+  .scan-top{flex-wrap:nowrap;gap:8px}.scan-top h3{font-size:17px;white-space:nowrap}.scan-tip{display:none}
+  .scan-tools .tabs{order:1}
+  .scan-tools .tab{padding:0 12px;font-size:14px}
+  .scan .mrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .scan .mrow .btn{justify-content:center;margin:0;min-height:42px}
+  .th{width:46px;height:60px}
+}
 @media(max-width:600px){.tools{margin:0;width:100%}.sep{display:none}.btn{padding:0 11px}.icon{padding:0}.btn .lb{display:none}#dl .lb{display:inline}.logo{height:38px}}
 @media(prefers-reduced-motion:reduce){#toast,.btn,.logo{transition:none}}
 </style>
@@ -135,6 +165,7 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
     <span id="fname"></span>
     <div class="tools" role="toolbar" aria-label="Editing tools">
       <button class="btn" id="open" title="Open a PDF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M12 4v12M7 9l5-5 5 5"/></svg><span class="lb">Open</span></button>
+      <button class="btn" id="scan" title="Scan a paper document with your camera"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg><span class="lb">Scan</span></button>
       <span class="sep"></span>
       <button class="btn" data-tool="select" aria-pressed="true" title="Select and move"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 8-6 1.5L10 19z"/></svg><span class="lb">Select</span></button>
       <button class="btn" data-tool="text" aria-pressed="false" title="Add text (T)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span class="lb">Text</span></button>
@@ -165,9 +196,10 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
       <g transform="rotate(38 150 60)"><rect x="140" y="18" width="12" height="70" rx="3" fill="#a5b4fc"/><path d="M140 88h12l-6 14z" fill="#1e1b4b"/></g>
     </svg>
     <h2>Fill in and sign a PDF</h2>
-    <p>Drop a PDF here, click anywhere to type, draw your signature, then download the finished file. Everything stays in your browser.</p>
+    <p>Drop a PDF here (or scan a paper document with your camera), click anywhere to type, draw your signature, then download the finished file. Everything stays in your browser.</p>
     <div class="row">
       <button class="btn main" id="pick">Choose a PDF</button>
+      <button class="btn" id="scan2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Scan with camera</button>
       <button class="btn" id="sample">Try a sample page</button>
     </div>
     <span class="small">Works with normal and multi-page PDFs</span>
@@ -193,7 +225,7 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
     </section>
   </div>
   <p class="users" id="users" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg><span><b id="ucount"></b> <span id="uword">people have</span> used Fill &amp; Sign</span></p>
-  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.0.0</span></p>
+  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.1.0</span></p>
 </footer>
 <input type="file" id="file" accept="application/pdf,.pdf" hidden>
 
@@ -215,6 +247,42 @@ body.t-text .layer,body.t-place .layer{cursor:crosshair}
       <button class="btn" id="cancel">Cancel</button>
       <button class="btn main" id="use">Place signature</button>
     </div>
+  </div>
+</div>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="gal" accept="image/*" multiple hidden>
+<div class="scan" id="scanner" role="dialog" aria-modal="true" aria-labelledby="scant" hidden>
+  <div class="scan-top">
+    <h3 id="scant">Scan document</h3><span class="small"><span id="scanInfo"></span><span class="scan-tip" id="scanTip"> · drag the corners to the edges of the paper</span></span>
+    <button class="btn icon" id="scanClose" title="Close scanner" aria-label="Close scanner"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="stage">
+    <div class="shot" id="shot" hidden><canvas id="shotc"></canvas><svg id="quad" aria-label="Crop corners: drag to fit the document edges"></svg></div>
+    <div class="scan-empty" id="scanEmpty">
+      <p>Take a photo of each page. Then drag the corners to the edges of the paper, pick a look, and save it as a PDF.</p>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <button class="btn main" data-add="cam"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Take photo</button>
+        <button class="btn" data-add="gal">Choose photos</button>
+      </div>
+    </div>
+  </div>
+  <div class="scan-tools" role="toolbar" aria-label="Page editing">
+    <button class="btn icon scan-need" id="rotL" title="Rotate left" aria-label="Rotate left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5"/><path d="M4.5 9A8 8 0 1 1 6 17"/></svg></button>
+    <button class="btn icon scan-need" id="rotR" title="Rotate right" aria-label="Rotate right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4v5h-5"/><path d="M19.5 9A8 8 0 1 0 18 17"/></svg></button>
+    <button class="btn scan-need" id="fullCrop" title="Reset the crop to the whole photo">Full photo</button>
+    <div class="tabs" role="radiogroup" aria-label="Look">
+      <button class="tab scan-need" role="radio" data-filter="original" aria-checked="false">Original</button>
+      <button class="tab scan-need" role="radio" data-filter="enhance" aria-checked="true">Enhanced</button>
+      <button class="tab scan-need" role="radio" data-filter="bw" aria-checked="false">Black &amp; white</button>
+    </div>
+    <button class="btn icon scan-need" id="delPage" title="Delete this page" aria-label="Delete this page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+  </div>
+  <div class="thumbs" id="thumbs" aria-label="Scanned pages"></div>
+  <div class="mrow">
+    <button class="btn" data-add="cam"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg><span>Add page</span></button>
+    <button class="btn" data-add="gal">From photos</button>
+    <button class="btn scan-need" id="scanSign" title="Open the scan in the editor to fill in and sign it">Fill &amp; sign</button>
+    <button class="btn main scan-need" id="scanSave"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Save PDF</button>
   </div>
 </div>
 <div id="toast" role="status"></div>
@@ -262,6 +330,7 @@ async function loadPdf(bytes, name){
 }
 function openFile(f){
   if(!f) return;
+  if(/^image\//.test(f.type)) return scanPhotos([f]);
   if(!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) return toast('Please choose a PDF file');
   f.arrayBuffer().then(b=>loadPdf(new Uint8Array(b), f.name));
 }
@@ -269,7 +338,10 @@ $('#open').onclick = $('#pick').onclick = () => $('#file').click();
 $('#file').onchange = e => { openFile(e.target.files[0]); e.target.value=''; };
 ['dragover','dragenter'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault(); empty.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault(); empty.classList.remove('drag');}));
-document.addEventListener('drop', e=>openFile(e.dataTransfer.files[0]));
+document.addEventListener('drop', e=>{
+  const fs=[...e.dataTransfer.files], im=fs.filter(f=>/^image\//.test(f.type));
+  im.length ? scanPhotos(im) : openFile(fs[0]);
+});
 
 $('#sample').onclick = async () => {
   const d = await PDFLib.PDFDocument.create(), p = d.addPage([595,842]);
@@ -347,6 +419,7 @@ function drag(e,it,mode){
   addEventListener('pointermove',mv); addEventListener('pointerup',up);
 }
 document.addEventListener('keydown', e=>{
+  if(!$('#scanner').hidden){ if(e.key==='Escape' && !$('#ov').classList.contains('on')) closeScanner(); return; }
   const typing = e.target.isContentEditable || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
   if(typing || !st.bytes) return;
   if((e.key==='Delete'||e.key==='Backspace') && st.sel){ e.preventDefault(); remove(st.sel); }
@@ -465,6 +538,241 @@ $('#use').onclick = async () => {
   closeSign(); setTool('place');
 };
 
+function saveFile(bytes, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('Downloaded '+name);
+}
+
+/* ---------- scanner ----------
+   Photos (camera or files) become pages. Each page keeps its downscaled photo, a rotation, four crop
+   corners (normalised 0..1, order TL TR BR BL, in rotated-photo space) and a look. Cropping is a
+   perspective warp, so a photo taken at an angle comes out as a straight, rectangular page. */
+const SC = {pages:[], cur:-1};
+const scanEl=$('#scanner'), shot=$('#shot'), shotc=$('#shotc'), quadSvg=$('#quad');
+const MAXPX=2400, FULL=[[0,0],[1,0],[1,1],[0,1]];
+const clamp01 = v => Math.min(1,Math.max(0,v));
+const curPage = () => SC.pages[SC.cur];
+
+function openScanner(camera){
+  scanEl.hidden=false; document.body.classList.add('scanning'); drawScan();
+  if(camera && !SC.pages.length) $('#cam').click();
+}
+function closeScanner(force){
+  if(!force && SC.pages.length && !confirm('Discard the scanned pages?')) return;
+  SC.pages=[]; SC.cur=-1; scanEl.hidden=true; document.body.classList.remove('scanning');
+}
+function scanPhotos(files){ openScanner(false); addPhotos(files); }
+$('#scan').onclick = $('#scan2').onclick = () => openScanner(true);
+$('#scanClose').onclick = () => closeScanner();
+$$('[data-add]').forEach(b=>b.onclick=()=>$('#'+b.dataset.add).click());
+['#cam','#gal'].forEach(id=>$(id).onchange=e=>{ addPhotos([...e.target.files]); e.target.value=''; });
+
+const loadImg = f => new Promise((res,rej)=>{
+  const u=URL.createObjectURL(f), i=new Image();
+  i.onload=()=>{ URL.revokeObjectURL(u); res(i); }; i.onerror=()=>{ URL.revokeObjectURL(u); rej(); }; i.src=u;
+});
+async function addPhotos(files){
+  for(const f of files){
+    if(!/^image\//.test(f.type)) continue;
+    let im; try{ im = await loadImg(f); }catch(e){ toast('Could not read '+f.name); continue; }
+    const k=Math.min(1,MAXPX/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement('canvas');
+    c.width=Math.max(1,Math.round(im.naturalWidth*k)); c.height=Math.max(1,Math.round(im.naturalHeight*k));
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    const p={base:c, src:c, rot:0, q:detectPaper(c), filter:'enhance'};
+    makeThumb(p); SC.pages.push(p); SC.cur=SC.pages.length-1;
+  }
+  drawScan();
+}
+
+/* Rough paper finder: on a small copy, split pixels into light and dark (Otsu), take the largest
+   light blob, and use its extreme points as the corners. If the blob does not look like a sheet
+   (too small, nearly the whole photo, or not quad-shaped) the crop starts as the full photo. */
+function detectPaper(src){
+  try{
+    const c=scaled(src,220), W=c.width, H=c.height, a=c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,W,H).data;
+    const L=new Uint8Array(W*H), hist=new Uint32Array(256);
+    for(let i=0;i<W*H;i++){ L[i]=(a[i*4]*77+a[i*4+1]*150+a[i*4+2]*29)>>8; hist[L[i]]++; }
+    let sum=0, sumB=0, wB=0, best=0, th=128; for(let v=0;v<256;v++) sum+=v*hist[v];
+    for(let v=0;v<256;v++){ wB+=hist[v]; if(!wB) continue; const wF=W*H-wB; if(!wF) break; sumB+=v*hist[v];
+      const d=wB*wF*Math.pow(sumB/wB-(sum-sumB)/wF,2); if(d>best){ best=d; th=v; } }
+    const lab=new Int32Array(W*H), stack=[]; let bestN=0, bestPts=null, id=0;
+    for(let s0=0;s0<W*H;s0++){
+      if(L[s0]<=th || lab[s0]) continue;
+      id++; lab[s0]=id; stack.push(s0); let n=0, tl=[0,0,1e9], tr=[0,0,-1e9], br=[0,0,-1e9], bl=[0,0,1e9];
+      while(stack.length){
+        const k=stack.pop(), x=k%W, y=(k-x)/W; n++;
+        if(x+y<tl[2]) tl=[x,y,x+y]; if(x+y>br[2]) br=[x,y,x+y]; if(x-y>tr[2]) tr=[x,y,x-y]; if(x-y<bl[2]) bl=[x,y,x-y];
+        if(x>0&&!lab[k-1]&&L[k-1]>th){ lab[k-1]=id; stack.push(k-1); }
+        if(x<W-1&&!lab[k+1]&&L[k+1]>th){ lab[k+1]=id; stack.push(k+1); }
+        if(y>0&&!lab[k-W]&&L[k-W]>th){ lab[k-W]=id; stack.push(k-W); }
+        if(y<H-1&&!lab[k+W]&&L[k+W]>th){ lab[k+W]=id; stack.push(k+W); }
+      }
+      if(n>bestN){ bestN=n; bestPts=[tl,tr,br,bl]; }
+    }
+    if(!bestPts) return FULL.map(a=>a.slice());
+    const P=bestPts.map(([x,y])=>[x,y]);
+    let area=0; for(let i=0;i<4;i++){ const [x1,y1]=P[i], [x2,y2]=P[(i+1)%4]; area+=x1*y2-x2*y1; } area=Math.abs(area)/2;
+    if(bestN<W*H*.12 || bestN>W*H*.9 || bestN<area*.8) return FULL.map(a=>a.slice());
+    return P.map(([x,y])=>[clamp01((x+.5)/W),clamp01((y+.5)/H)]);
+  }catch(e){ return FULL.map(a=>a.slice()); }
+}
+
+function rotated(p){
+  const b=p.base; if(!p.rot) return b;
+  const c=document.createElement('canvas'), odd=p.rot%2;
+  c.width=odd?b.height:b.width; c.height=odd?b.width:b.height;
+  const g=c.getContext('2d'); g.translate(c.width/2,c.height/2); g.rotate(p.rot*Math.PI/2); g.drawImage(b,-b.width/2,-b.height/2);
+  return c;
+}
+function rotatePage(dir){
+  const p=curPage(); if(!p) return;
+  p.rot=(p.rot+dir+4)%4;
+  // carry the crop corners along, keeping them in TL TR BR BL order
+  p.q = dir>0 ? [p.q[3],p.q[0],p.q[1],p.q[2]].map(([x,y])=>[1-y,x]) : [p.q[1],p.q[2],p.q[3],p.q[0]].map(([x,y])=>[y,1-x]);
+  p.src=rotated(p); makeThumb(p); drawScan();
+}
+$('#rotL').onclick=()=>rotatePage(-1); $('#rotR').onclick=()=>rotatePage(1);
+$('#fullCrop').onclick=()=>{ const p=curPage(); if(!p) return; p.q=FULL.map(a=>a.slice()); makeThumb(p); drawScan(); };
+$$('[data-filter]').forEach(b=>b.onclick=()=>{ const p=curPage(); if(!p) return; p.filter=b.dataset.filter; makeThumb(p); drawScan(); });
+$('#delPage').onclick=()=>{
+  if(!curPage()) return;
+  SC.pages.splice(SC.cur,1); SC.cur=Math.min(SC.cur,SC.pages.length-1); drawScan();
+};
+
+/* Looks. Levels come from histograms of the cropped area: the darkest 2% become black and the brightest
+   10% (the paper) becomes white. "Enhanced" levels each colour channel on its
+   own, which also removes a yellow or blue cast from the paper; "Black & white" uses brightness. */
+function applyFilter(c, mode, box){
+  if(mode==='original') return c;
+  const g=c.getContext('2d',{willReadFrequently:true}), W=c.width, H=c.height, d=g.getImageData(0,0,W,H), a=d.data;
+  const [bx0,by0,bx1,by1] = box || [0,0,1,1], bw = mode==='bw', hist=[0,1,2].map(()=>new Uint32Array(256));
+  let tot=0;
+  for(let y=Math.floor(by0*H), ye=Math.ceil(by1*H); y<ye; y+=2) for(let x=Math.floor(bx0*W), xe=Math.ceil(bx1*W); x<xe; x+=2){
+    const i=(y*W+x)*4; tot++;
+    if(bw) hist[0][(a[i]*77+a[i+1]*150+a[i+2]*29)>>8]++;
+    else { hist[0][a[i]]++; hist[1][a[i+1]]++; hist[2][a[i+2]]++; }
+  }
+  const pct=(h,f)=>{ let s=0; for(let v=0;v<256;v++){ s+=h[v]; if(s>=tot*f) return v; } return 255; };
+  const luts=hist.slice(0,bw?1:3).map(h=>{
+    const lo=pct(h,.02), hi=Math.max(lo+40, pct(h,.9)), lut=new Uint8ClampedArray(256);
+    for(let v=0;v<256;v++){ const t=clamp01((v-lo)/(hi-lo)); lut[v]=255*(bw?Math.pow(t,1.6):t); }
+    return lut;
+  });
+  for(let i=0;i<a.length;i+=4){
+    if(bw){ a[i]=a[i+1]=a[i+2]=luts[0][(a[i]*77+a[i+1]*150+a[i+2]*29)>>8]; }
+    else { a[i]=luts[0][a[i]]; a[i+1]=luts[1][a[i+1]]; a[i+2]=luts[2][a[i+2]]; }
+  }
+  g.putImageData(d,0,0); return c;
+}
+
+/* Perspective warp: map the unit square onto the crop quad (Heckbert's square-to-quad solution),
+   then sample the source with bilinear filtering for every output pixel. */
+function squareToQuad(P){
+  const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=P, sx=x0-x1+x2-x3, sy=y0-y1+y2-y3;
+  let g=0, h=0;
+  if(Math.abs(sx)>1e-9 || Math.abs(sy)>1e-9){
+    const dx1=x1-x2, dx2=x3-x2, dy1=y1-y2, dy2=y3-y2, den=dx1*dy2-dx2*dy1;
+    if(Math.abs(den)>1e-9){ g=(sx*dy2-dx2*sy)/den; h=(dx1*sy-sx*dy1)/den; }
+  }
+  const a=x1-x0+g*x1, b=x3-x0+h*x3, d=y1-y0+g*y1, e=y3-y0+h*y3;
+  return (u,v)=>{ const w=g*u+h*v+1; return [(a*u+b*v+x0)/w,(d*u+e*v+y0)/w]; };
+}
+function warp(src, q, maxSide){
+  const W0=src.width, H0=src.height, P=q.map(([x,y])=>[x*W0,y*H0]), dist=(m,n)=>Math.hypot(m[0]-n[0],m[1]-n[1]);
+  let w=Math.max(dist(P[0],P[1]),dist(P[3],P[2])), h=Math.max(dist(P[0],P[3]),dist(P[1],P[2]));
+  const k=Math.min(1,maxSide/Math.max(w,h,1)); w=Math.max(1,Math.round(w*k)); h=Math.max(1,Math.round(h*k));
+  const out=document.createElement('canvas'); out.width=w; out.height=h;
+  if(q.every((p,i)=>p[0]===FULL[i][0]&&p[1]===FULL[i][1])){ out.getContext('2d').drawImage(src,0,0,w,h); return out; }
+  const sd=src.getContext('2d').getImageData(0,0,W0,H0).data, od=new ImageData(w,h), o=od.data, f=squareToQuad(P);
+  for(let y=0,j=0;y<h;y++){
+    const v=(y+.5)/h;
+    for(let x=0;x<w;x++,j+=4){
+      const s=f((x+.5)/w,v);
+      const X=Math.min(Math.max(s[0]-.5,0),W0-1.001), Y=Math.min(Math.max(s[1]-.5,0),H0-1.001);
+      const xi=X|0, yi=Y|0, fx=X-xi, fy=Y-yi, i0=(yi*W0+xi)*4, i2=i0+W0*4;
+      for(let c=0;c<3;c++) o[j+c]=(sd[i0+c]*(1-fx)+sd[i0+4+c]*fx)*(1-fy)+(sd[i2+c]*(1-fx)+sd[i2+4+c]*fx)*fy;
+      o[j+3]=255;
+    }
+  }
+  out.getContext('2d').putImageData(od,0,0); return out;
+}
+const bbox = q => [Math.min(...q.map(p=>p[0])),Math.min(...q.map(p=>p[1])),Math.max(...q.map(p=>p[0])),Math.max(...q.map(p=>p[1]))];
+function scaled(src, max){
+  const k=Math.min(1,max/Math.max(src.width,src.height)), c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(src.width*k)); c.height=Math.max(1,Math.round(src.height*k));
+  c.getContext('2d').drawImage(src,0,0,c.width,c.height); return c;
+}
+function makeThumb(p){ p.th = applyFilter(warp(scaled(p.src,500),p.q,160),p.filter).toDataURL('image/jpeg',.75); }
+
+function drawScan(){
+  const p=curPage(), has=!!p;
+  shot.hidden=!has; $('#scanEmpty').hidden=has;
+  $$('.scan-need').forEach(b=>b.disabled=!has);
+  $('#scanInfo').textContent = has ? 'Page '+(SC.cur+1)+' of '+SC.pages.length : ''; $('#scanTip').hidden=!has;
+  const th=$('#thumbs'); th.hidden=!has; th.innerHTML='';
+  SC.pages.forEach((pg,i)=>{
+    const b=document.createElement('button'); b.className='th'; b.setAttribute('aria-label','Page '+(i+1));
+    if(i===SC.cur) b.setAttribute('aria-current','true');
+    b.innerHTML='<img alt="" src="'+pg.th+'"><span>'+(i+1)+'</span>';
+    b.onclick=()=>{ SC.cur=i; drawScan(); };
+    th.appendChild(b);
+  });
+  if(!has) return;
+  $$('[data-filter]').forEach(b=>b.setAttribute('aria-checked',b.dataset.filter===p.filter));
+  const pv=scaled(p.src,1400);
+  shot.style.setProperty('--ar', pv.width/pv.height);
+  shotc.width=pv.width; shotc.height=pv.height;
+  shotc.getContext('2d').drawImage(pv,0,0);
+  applyFilter(shotc,p.filter,bbox(p.q));
+  drawQuad();
+}
+function drawQuad(){
+  const p=curPage(); if(!p || shot.hidden) return;
+  const W=shotc.width, H=shotc.height, r=W/Math.max(1,shot.clientWidth), pts=p.q.map(([x,y])=>[x*W,y*H]);
+  quadSvg.setAttribute('viewBox','0 0 '+W+' '+H);
+  quadSvg.innerHTML =
+    '<path d="M0 0H'+W+'V'+H+'H0Z M'+pts.map(a=>a.join(' ')).join('L')+'Z" fill="rgba(15,12,40,.5)" fill-rule="evenodd"/>'+
+    '<polygon points="'+pts.map(a=>a.join(',')).join(' ')+'" fill="none" stroke="#6366f1" stroke-width="'+2.5*r+'"/>'+
+    pts.map((a,i)=>'<circle class="hit" data-i="'+i+'" cx="'+a[0]+'" cy="'+a[1]+'" r="'+24*r+'" fill="transparent"/>'+
+      '<circle class="hdl" cx="'+a[0]+'" cy="'+a[1]+'" r="'+11*r+'" fill="#fff" stroke="#6366f1" stroke-width="'+3*r+'"/>').join('');
+}
+addEventListener('resize', drawQuad);
+quadSvg.addEventListener('pointerdown', e=>{
+  const i=e.target.dataset && e.target.dataset.i, p=curPage();
+  if(i==null || !p) return;
+  e.preventDefault(); quadSvg.setPointerCapture(e.pointerId);
+  const mv=ev=>{ const b=shotc.getBoundingClientRect(); p.q[+i]=[clamp01((ev.clientX-b.left)/b.width),clamp01((ev.clientY-b.top)/b.height)]; drawQuad(); };
+  const up=()=>{ ['pointermove','pointerup','pointercancel'].forEach((t,n)=>quadSvg.removeEventListener(t,n?up:mv)); makeThumb(p); drawScan(); };
+  quadSvg.addEventListener('pointermove',mv); quadSvg.addEventListener('pointerup',up); quadSvg.addEventListener('pointercancel',up);
+});
+
+/* Each page becomes a JPEG on a PDF page that is A4-wide (portrait) or A4-high (landscape). */
+async function buildScanPdf(){
+  const doc=await PDFLib.PDFDocument.create(), A4=595.28;
+  for(const p of SC.pages){
+    const c=applyFilter(warp(p.src,p.q,MAXPX),p.filter);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+    const img=await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+    const W = c.height>=c.width ? A4 : A4*c.width/c.height, H = W*c.height/c.width;
+    doc.addPage([W,H]).drawImage(img,{x:0,y:0,width:W,height:H});
+  }
+  return doc.save();
+}
+const scanName = () => 'scan-'+new Date().toISOString().slice(0,10)+'.pdf';
+async function scanDone(sign){
+  const btns=$$('#scanSave,#scanSign'); btns.forEach(b=>b.disabled=true); toast('Building PDF…');
+  try{
+    const bytes=await buildScanPdf(), name=scanName();
+    if(sign){ closeScanner(true); await loadPdf(bytes,name); toast('Scan opened: add text or a signature, then download'); }
+    else saveFile(bytes,name);
+  }catch(e){ console.error(e); toast('Could not build the PDF: '+(e.message||e)); }
+  btns.forEach(b=>b.disabled=!curPage());
+}
+$('#scanSave').onclick=()=>scanDone(false);
+$('#scanSign').onclick=()=>scanDone(true);
+
 /* ---------- export ---------- */
 const hex = h => PDFLib.rgb(parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255);
 const clean = s => [...s].map(c=>{ const n=c.charCodeAt(0); return (n>=32&&n<=255)||'€‘’“”–—…•'.includes(c) ? c : '?'; }).join('');
@@ -493,11 +801,7 @@ $('#dl').onclick = async () => {
         p.drawImage(img,{...at(it.x, it.y+it.h), rotate, width:it.w, height:it.h});
       }
     }
-    const name = st.name.replace(/\.pdf$/i,'')+'-signed.pdf';
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); a.download = name;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-    toast('Downloaded '+name);
+    saveFile(await doc.save(), st.name.replace(/\.pdf$/i,'')+'-signed.pdf');
   } catch(e){ console.error(e); toast('Could not build the PDF: '+(e.message||e)); }
   btn.disabled=false;
 };
