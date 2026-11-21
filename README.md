@@ -7,6 +7,8 @@ A single-file, browser-only tool for filling in and signing PDFs. Open a PDF, cl
 - **Open any PDF** with the Open button, the file picker, or drag and drop. Multi-page documents work.
 - **Add text** anywhere on a page. You can pick the size (9–24 pt) and the ink colour (black or blue). Text boxes support multiple lines and can be moved with the grip handle.
 - **Create a signature** by drawing it on a pad, or by typing your name and picking one of 12 handwriting styles (Dancing Script, Great Vibes, Caveat, Allura, Alex Brush, Sacramento, Mr Dafoe, Homemade Apple, Satisfy, Pinyon Script, Herr Von Muellerhoff, Kristi). Your chosen style is remembered. It is cropped to the strokes, placed with a click, and can be moved and resized. Your last signature is saved in `localStorage` so you can reuse it.
+- **Scan a paper document** with the Scan button. On a phone it opens the camera; on a computer it lets you pick photos (you can also drop image files onto the page). The scanner finds the sheet of paper automatically. You can drag the four corners to adjust the crop, which also straightens photos taken at an angle. You can rotate each page and pick a look (Original, Enhanced, or Black & white). Add as many pages as you need, then **Save PDF** (`scan-YYYY-MM-DD.pdf`), or choose **Fill & sign** to open the scan in the editor.
+- **Rotated pages** (PDFs with a `/Rotate` entry, such as landscape pages) get text and signatures in the right place and the right way up.
 - **Download** a new PDF named `<original>-signed.pdf`. Text and signatures are written into the real PDF, not just shown on screen.
 - **Try a sample page**: makes a sample "Equipment loan form" so you can try the editor without a file.
 - A privacy note in the footer tells users their files never leave their device: there is no backend, no uploads, and nothing is stored or seen by the site owner.
@@ -34,7 +36,7 @@ An internet connection is needed: PDF.js, pdf-lib and the fonts load from public
 | `T` | Text tool |
 | `S` | Open the signature pad |
 | `Delete` / `Backspace` | Delete the selected item |
-| `Esc` | Go back to the Select tool and clear the selection |
+| `Esc` | Go back to the Select tool and clear the selection (in the scanner: close it) |
 
 ## How it works
 
