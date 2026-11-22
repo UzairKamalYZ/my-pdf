@@ -1,0 +1,10 @@
+# Files in the repository root that must not be published as part of the website.
+.git
+.idea
+.wrangler
+node_modules
+worker
+wrangler.jsonc
+.assetsignore
+.gitignore
+README.md
