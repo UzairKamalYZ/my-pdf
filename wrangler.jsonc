@@ -1,6 +1,5 @@
 // Cloudflare Worker for pdf.kamtechsolutions.eu.
-// Serves the static site (index.html and assets/) and a small visitor counter API at /api/count,
-// stored in a Durable Object (SQLite-backed, available on the Workers free plan; no setup needed).
+// Serves the static site (index.html and assets/).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-pdf",
@@ -11,8 +10,9 @@
     "directory": ".",
     "binding": "ASSETS"
   },
-  "durable_objects": {
-    "bindings": [{ "name": "COUNTER", "class_name": "Counter" }]
-  },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Counter"] }]
+  // v1 created the Durable Object for the old visitor counter; v2 deletes it and its data.
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Counter"] },
+    { "tag": "v2", "deleted_classes": ["Counter"] }
+  ]
 }

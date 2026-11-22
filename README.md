@@ -13,7 +13,6 @@ A single-file, browser-only tool for filling in and signing PDFs. Open a PDF, cl
 - **Try a sample page**: makes a sample "Equipment loan form" so you can try the editor without a file.
 - A privacy note in the footer tells users their files never leave their device: there is no backend, no uploads, and nothing is stored or seen by the site owner.
 - An **About us** section links to [KamTech Solutions](https://kamtechsolutions.eu) and explains the tool is free. Instead of paying, users are asked to donate to charity or help someone close to them who is struggling.
-- A **distinct user counter** in the footer. Each browser adds +1 only on its first visit (remembered in `localStorage`) and later just reads the total, so no personal data is sent. The count is kept by the site's own Cloudflare Worker at `/api/count` (see *Deployment* below). If that isn't available, for example when `index.html` is opened locally, the page falls back to the free [Abacus](https://jasoncameron.dev/abacus/) counting API that the site used before. The last total a browser saw is shown straight away and refreshed when the answer arrives.
 - Styled with the KamTech Solutions brand (Indigo Edge palette, Sora and Manrope fonts, logo and favicon).
 - Light and dark themes follow your system setting, with a toggle in the header to switch. The layout works on phones.
 
@@ -68,7 +67,7 @@ assets/
 The site runs on Cloudflare Workers (`wrangler.jsonc`), deployed by Cloudflare Workers Builds from `main`:
 
 - The static site (`index.html`, `assets/`) is served from the repository root as Worker static assets. `.assetsignore` keeps everything else (the Worker code, config, README, editor files) out of the upload.
-- `worker/index.js` adds `GET /api/count` (read the total) and `POST /api/count` (count a new browser). The total is stored in a SQLite-backed Durable Object, which is available on the Workers free plan and needs no setup in the dashboard. The first time it starts, it copies the total from the old Abacus counter so the count carries on.
+- `worker/index.js` only hands every request to the static assets. It exists because the Durable Object that held the old visitor counter (removed in v1.3.0) is deleted through a migration in `wrangler.jsonc`, and migrations need a Worker script.
 
 To run it locally: `npx wrangler dev`, then open http://localhost:8787.
 
