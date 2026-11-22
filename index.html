@@ -225,7 +225,7 @@ body.scanning{overflow:hidden}
     </section>
   </div>
   <p class="users" id="users" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg><span><b id="ucount"></b> <span id="uword">people have</span> used Fill &amp; Sign</span></p>
-  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.1.2</span></p>
+  <p class="credit">© <span id="yr"></span> <a href="https://kamtechsolutions.eu" target="_blank" rel="noopener">KamTech Solutions</a> · <span class="ver" title="App version">v1.2.0</span></p>
 </footer>
 <input type="file" id="file" accept="application/pdf,.pdf" hidden>
 
@@ -431,40 +431,54 @@ document.addEventListener('keydown', e=>{
 $('#yr').textContent = new Date().getFullYear();
 
 /* ---------- distinct user counter ----------
-   Free Abacus counting API (https://jasoncameron.dev/abacus/). A browser adds +1 only on its
-   first visit (remembered in localStorage); later visits just read the total. Nothing about the
-   user or their files is sent. The service is often slow (several seconds) or briefly returns
-   errors, so: the last total this browser saw is shown at once and refreshed when the service
-   answers, each request waits up to 15 s, and a failed request is retried once. */
+   A browser adds +1 only on its first visit (remembered in localStorage); later visits just read
+   the total. Nothing about the user or their files is sent.
+   1. The site's own counter: /api/count, served by the Cloudflare Worker (worker/index.js).
+   2. Fallback when that isn't there (for example opening index.html locally): the free Abacus
+      service the site used before (https://jasoncameron.dev/abacus/). It is often slow or briefly
+      returns errors, so requests wait up to 15 s and are retried once.
+   The last total this browser saw is shown at once and refreshed when the answer arrives. */
 (async () => {
-  const API = 'https://abacus.jasoncameron.dev', KEY = 'kamtechsolutions.eu/fill-and-sign-users';
+  const ABACUS = 'https://abacus.jasoncameron.dev', KEY = 'kamtechsolutions.eu/fill-and-sign-users';
   const show = v => { $('#ucount').textContent = v.toLocaleString(); $('#uword').textContent = v===1?'person has':'people have'; $('#users').hidden=false; };
   let counted = false, cached = 0;
   try{ counted = localStorage.getItem('fs-counted')==='1'; cached = +localStorage.getItem('fs-count')||0; }catch(e){}
   if(cached>0) show(cached);
-  const call = async kind => {
-    const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), 15000);
-    try{ return await fetch(API+'/'+kind+'/'+KEY, {cache:'no-store', signal:ctl.signal}); } finally{ clearTimeout(t); }
+  const timed = async (url, opts, ms) => {
+    const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), ms);
+    try{ return await fetch(url, {cache:'no-store', ...opts, signal:ctl.signal}); } finally{ clearTimeout(t); }
   };
-  const attempt = async kind => {
-    for(let i=0;;i++){
-      try{ const r = await call(kind); if(r.status<500 || i) return r; }
-      catch(e){ if(i) throw e; }
-      await new Promise(res=>setTimeout(res,1500));  // one retry after a server error or timeout
-    }
-  };
-  try{
-    let r = await attempt(counted ? 'get' : 'hit');
-    if(r.status===404 && counted){ counted=false; r = await attempt('hit'); }  // counter was reset on the service: count this browser again
-    if(!r.ok) throw new Error('HTTP '+r.status);
+  const valueOf = async r => {
+    if(!r.ok || !(r.headers.get('content-type')||'').includes('json')) throw new Error('HTTP '+r.status);
     const {value} = await r.json();
     if(typeof value!=='number') throw new Error('unexpected response');
-    try{ localStorage.setItem('fs-counted','1'); if(value>0) localStorage.setItem('fs-count', String(value)); }catch(e){}
-    if(value>0) show(value);
-  }catch(e){
-    // Keeps the last known total (if any); the reason is logged for checking in the browser console.
-    console.warn('User counter unavailable ('+API+'): '+(e.name==='AbortError' ? 'timed out' : e.message||e)+'. A blocked request (ad blocker or the service being down) also shows up here.');
+    return value;
+  };
+  const own = async () => valueOf(await timed('/api/count', {method: counted ? 'GET' : 'POST'}, 8000));
+  const abacus = async () => {
+    const attempt = async kind => {
+      for(let i=0;;i++){
+        try{ const r = await timed(ABACUS+'/'+kind+'/'+KEY, {}, 15000); if(r.status<500 || i) return r; }
+        catch(e){ if(i) throw e; }
+        await new Promise(res=>setTimeout(res,1500));  // one retry after a server error or timeout
+      }
+    };
+    let r = await attempt(counted ? 'get' : 'hit');
+    if(r.status===404 && counted) r = await attempt('hit');  // counter was reset on the service: count this browser again
+    return valueOf(r);
+  };
+  let value;
+  try{ value = await own(); }
+  catch(e1){
+    try{ value = await abacus(); }
+    catch(e2){
+      // Keeps the last known total (if any); the reasons are logged for checking in the browser console.
+      console.warn('User counter unavailable. Own counter (/api/count): '+(e1.name==='AbortError'?'timed out':e1.message||e1)+'; Abacus: '+(e2.name==='AbortError'?'timed out':e2.message||e2)+'.');
+      return;
+    }
   }
+  try{ localStorage.setItem('fs-counted','1'); if(value>0) localStorage.setItem('fs-count', String(value)); }catch(e){}
+  if(value>0) show(value);
 })();
 
 /* ---------- theme ---------- */
